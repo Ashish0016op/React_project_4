@@ -6,18 +6,22 @@ import Button from '../UI/Button/Button';
 
 const emailReducer = (state, action) => {
   if (action.type === 'email') {
-    return { ...state, value: action.value, isValid: action.isValid };
-  } else {
-    return state;
+    return {value: action.value, isValid: action.value.includes('@') };
   }
+  if(action.type==='email_blur'){
+    return {value:state.value,isValid:false};
+  }
+  return {value:'',isValid:false};
 };
 
 const passReducer = (state, action) => {
   if (action.type === 'password') {
-    return { ...state, value: action.value, isValid: action.isValid };
-  } else {
-    return state;
+    return {value: action.value, isValid: action.value.trim().length>6 };
   }
+  if(action.type==='password_blur'){
+    return {value:state.value,isValid:false}
+  }
+  return {value:'',isValid:false};
 };
 
 const Login = (props) => {
@@ -37,16 +41,20 @@ const Login = (props) => {
     emailDispatch({
       type: 'email',
       value: event.target.value,
-      isValid: event.target.value.includes('@'),
     });
+    setFormIsValid(
+      event.target.value.includes('@')
+    )
   };
 
   const passwordChangeHandler = (event) => {
     passDispatch({
       type: 'password',
       value: event.target.value,
-      isValid: event.target.value.trim().length > 6,
     });
+    setFormIsValid(
+      emailState.value.includes('@') && event.target.value.trim().length>6
+    )
   };
 
   const collegeChangeHandler = (event) => {
@@ -55,28 +63,20 @@ const Login = (props) => {
 
   const validateEmailHandler = () => {
     emailDispatch({
-      type: 'email',
-      value: emailState.value,
-      isValid: emailState.value.includes('@'),
+      type: 'email_blur',
     });
-    setFormIsValid(emailState.isValid && passwordState.isValid);
   };
 
   const validatePasswordHandler = () => {
     passDispatch({
-      type: 'password',
-      value: passwordState.value,
-      isValid: passwordState.value.length > 6,
+      type: 'password_blur',
     });
-    setFormIsValid(emailState.isValid && passwordState.isValid);
+    
   };
 
   const validateCollegeHandler = () => {
     setCollegeIsValid(enteredCollege !== '');
   };
-
- 
-
   const submitHandler = (event) => {
     event.preventDefault();
     props.onLogin(emailState.value, passwordState.value);
